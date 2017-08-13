@@ -19,6 +19,7 @@ SSR_METHOD=
 SSR_PROTOCOL=
 SSR_OBFS=
 
+SVD_IP=
 SVD_PORT=
 SVD_USERNAME=
 SVD_PASSWORD=
@@ -81,16 +82,22 @@ sed -i \
 	/root/shadowsocksr/shadowsocks/user-config.json
 
 # -----------------------------------------------------------------------------
+# Install & configure DDNS
+# -----------------------------------------------------------------------------
+cp centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf
+chmod +x /root/ddns_update.sh
+
+# -----------------------------------------------------------------------------
 # Install & configure supervisor
 # -----------------------------------------------------------------------------
-mv ./
+cp centos-ssh-ssr-vps/etc/* /etc/ -rf
 
 easy_install supervisor
 
 sed -i \
-	-e 's/port=.*/port='${SVD_PORT:-1080}'/' \
+	-e 's/port=.*/port='${SVD_IP:-127.0.0.1}:${SVD_PORT:-1080}'/' \
 	-e 's/username=.*/username='${SVD_USERNAME:-root}'/' \
 	-e 's/password=.*/password='${SVD_PASSWORD:-password}'/' \
 	/etc/supervisord.conf
 
-supervisord -c /etc/supervisord.conf
+supervisord -c /etc/supervisord.conf &
