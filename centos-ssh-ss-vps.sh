@@ -50,11 +50,6 @@ yum install -y \
 yum clean all
 
 # -----------------------------------------------------------------------------
-# Configure root password
-# -----------------------------------------------------------------------------
-echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
-
-# -----------------------------------------------------------------------------
 # Configure SSH
 # -----------------------------------------------------------------------------
 sed -i \
@@ -71,7 +66,7 @@ ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 # Install & configure Shadowsocks
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/command=/command=ssserver -p ${SS_PORT:-1000} -k ${SS_PASSWORD:-none} -m ${SS_METHOD:-aes-256-cfb}/g' \
+	-e 's/command=/command=ssserver -p '${SS_PORT:-1000}' -k '${SS_PASSWORD:-none}' -m '${SS_METHOD:-aes-256-cfb}'/g' \
 	-e 's/^autostart=/autostart=true/g' \
 	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocks.conf
 
@@ -82,8 +77,8 @@ pip install git+https://github.com/shadowsocks/shadowsocks.git@master
 # Install & configure DDNS
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/^USERNAME=/USERNAME=${DDNS_USERNAME:-root}/g' \
-	-e 's/^PASSWORD=/PASSWORD=${DDNS_PASSWORD:-none}/g' \
+	-e 's/^USERNAME=/USERNAME='${DDNS_USERNAME:-root}'/g' \
+	-e 's/^PASSWORD=/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
 	/root/centos-ssh-ssr-vps/ddns_update.sh
 
 cp /root/centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf
@@ -103,3 +98,8 @@ sed -i \
 	/etc/supervisord.conf
 
 supervisord -c /etc/supervisord.conf &
+
+# -----------------------------------------------------------------------------
+# Configure root password
+# -----------------------------------------------------------------------------
+echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd

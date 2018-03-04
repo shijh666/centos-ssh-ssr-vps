@@ -52,11 +52,6 @@ yum install -y \
 yum clean all
 
 # -----------------------------------------------------------------------------
-# Configure root password
-# -----------------------------------------------------------------------------
-echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
-
-# -----------------------------------------------------------------------------
 # Configure SSH
 # -----------------------------------------------------------------------------
 sed -i \
@@ -92,8 +87,8 @@ sed -i \
 # Install & configure DDNS
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/^USERNAME=/USERNAME=${DDNS_USERNAME:-root}/g' \
-	-e 's/^PASSWORD=/PASSWORD=${DDNS_PASSWORD:-none}/g' \
+	-e 's/^USERNAME=/USERNAME='${DDNS_USERNAME:-root}'/g' \
+	-e 's/^PASSWORD=/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
 	/root/centos-ssh-ssr-vps/ddns_update.sh
 
 cp /root/centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf
@@ -113,3 +108,8 @@ sed -i \
 	/etc/supervisord.conf
 
 supervisord -c /etc/supervisord.conf &
+
+# -----------------------------------------------------------------------------
+# Configure root password
+# -----------------------------------------------------------------------------
+echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
