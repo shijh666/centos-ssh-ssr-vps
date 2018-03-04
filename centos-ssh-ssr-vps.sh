@@ -22,7 +22,6 @@ SSR_OBFS=
 DDNS_USERNAME=
 DDNS_PASSWORD=
 
-SVD_IP=
 SVD_PORT=1080
 SVD_USERNAME=root
 SVD_PASSWORD=
@@ -43,7 +42,7 @@ yum install -y \
 	make \
 	python-setuptools \
 	git \
-	net-tool \
+	net-tools \
 	wget \
 	tcpdump \
 	screen \
@@ -83,6 +82,8 @@ sed -i \
 	-e 's/"obfs".*/"obfs": "'${SSR_OBFS:-tls1.2_ticket_auth}'",/' \
 	/root/shadowsocksr/shadowsocks/user-config.json
 
+firewall-cmd --zone=public --add-port=${SSR_PORT:-1080}/tcp --permanent
+
 # -----------------------------------------------------------------------------
 # Install & configure DDNS
 # -----------------------------------------------------------------------------
@@ -102,13 +103,16 @@ cp /root/centos-ssh-ssr-vps/etc/* /etc/ -rf
 easy_install supervisor
 
 sed -i \
-	-e 's/port=.*/port='${SVD_IP:-127.0.0.1}:${SVD_PORT:-1080}'/' \
+	-e 's/port=.*/port='0.0.0.0:${SVD_PORT:-1080}'/' \
 	-e 's/username=.*/username='${SVD_USERNAME:-root}'/' \
 	-e 's/password=.*/password='${SVD_PASSWORD:-none}'/' \
 	/etc/supervisord.conf
 
 supervisord -c /etc/supervisord.conf &
 
+firewall-cmd --zone=public --add-port=${SVD_PORT:-1080}/tcp --permanent
+
+firewall-cmd --reload
 # -----------------------------------------------------------------------------
 # Configure root password
 # -----------------------------------------------------------------------------
