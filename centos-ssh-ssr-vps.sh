@@ -3,7 +3,7 @@
 # =============================================================================
 # shijh666/centos-ssh-vps
 #
-# CentOS 6 - SSH / SSR.
+# CentOS 7 - SSH / SSR.
 #
 # =============================================================================
 
@@ -71,7 +71,7 @@ cd /root/ && \
   cp -nf shadowsocksr/config.json shadowsocksr/shadowsocks/user-config.json
 
 sed -i \
-	-e 's/^autostart=/autostart=true/g' \
+	-e 's/^autostart=.*/autostart=true/g' \
 	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocksr.conf
   
 sed -i \
@@ -88,8 +88,8 @@ firewall-cmd --zone=public --add-port=${SSR_PORT:-1080}/tcp --permanent
 # Install & configure DDNS
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/^USERNAME=/USERNAME='${DDNS_USERNAME:-root}'/g' \
-	-e 's/^PASSWORD=/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
+	-e 's/^USERNAME=.*/USERNAME='${DDNS_USERNAME:-root}'/g' \
+	-e 's/^PASSWORD=.*/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
 	/root/centos-ssh-ssr-vps/ddns_update.sh
 
 cp /root/centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf

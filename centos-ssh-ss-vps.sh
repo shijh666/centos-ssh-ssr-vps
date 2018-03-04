@@ -3,7 +3,7 @@
 # =============================================================================
 # shijh666/centos-ssh-vps
 #
-# CentOS 6 - SSH / SSR.
+# CentOS 7 - SSH / SSR.
 #
 # =============================================================================
 
@@ -65,8 +65,8 @@ ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 # Install & configure Shadowsocks
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/command=/command=ssserver -p '${SS_PORT:-1000}' -k '${SS_PASSWORD:-none}' -m '${SS_METHOD:-aes-256-cfb}'/g' \
-	-e 's/^autostart=/autostart=true/g' \
+	-e 's/command=.*/command=ssserver -p '${SS_PORT:-1000}' -k '${SS_PASSWORD:-none}' -m '${SS_METHOD:-aes-256-cfb}'/g' \
+	-e 's/^autostart=.*/autostart=true/g' \
 	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocks.conf
 
 easy_install pip
@@ -78,8 +78,8 @@ firewall-cmd --zone=public --add-port=${SSR_PORT:-1080}/tcp --permanent
 # Install & configure DDNS
 # -----------------------------------------------------------------------------
 sed -i \
-	-e 's/^USERNAME=/USERNAME='${DDNS_USERNAME:-root}'/g' \
-	-e 's/^PASSWORD=/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
+	-e 's/^USERNAME=.*/USERNAME='${DDNS_USERNAME:-root}'/g' \
+	-e 's/^PASSWORD=.*/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
 	/root/centos-ssh-ssr-vps/ddns_update.sh
 
 cp /root/centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf
