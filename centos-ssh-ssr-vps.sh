@@ -109,12 +109,21 @@ sed -i \
 	-e 's/password=.*/password='${SVD_PASSWORD:-none}'/' \
 	/etc/supervisord.conf
 
-supervisord -c /etc/supervisord.conf &
+[ -n "$(cat /etc/rc.local | grep "supervisord")" ] || \
+	echo "supervisord -c /etc/supervisord.conf &" >> /etc/rc.local
 
 firewall-cmd --zone=public --add-port=${SVD_PORT:-1080}/tcp --permanent
 
 firewall-cmd --reload
+
 # -----------------------------------------------------------------------------
 # Configure root password
 # -----------------------------------------------------------------------------
 echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
+
+# -----------------------------------------------------------------------------
+# Install bbr
+# -----------------------------------------------------------------------------
+wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh -P /root/centos-ssh-ssr-vps/
+chmod +x /root/centos-ssh-ssr-vps/bbr.sh
+/root/centos-ssh-ssr-vps/bbr.sh
