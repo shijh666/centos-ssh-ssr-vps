@@ -82,7 +82,8 @@ sed -i \
 	-e 's/"obfs".*/"obfs": "'${SSR_OBFS:-tls1.2_ticket_auth}'",/' \
 	/root/shadowsocksr/shadowsocks/user-config.json
 
-firewall-cmd --zone=public --add-port=${SSR_PORT:-1080}/tcp --permanent
+firewall-cmd --zone=public --add-port=${SSR_PORT:-1000}/tcp --permanent
+firewall-cmd --zone=public --add-port=${SSR_PORT:-1000}/udp --permanent
 
 # -----------------------------------------------------------------------------
 # Install & configure DDNS
