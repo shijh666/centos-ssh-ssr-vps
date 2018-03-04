@@ -9,10 +9,13 @@
 # -----------------------------------------------------------------------------
 # Update DDNS record Periodically.
 # -----------------------------------------------------------------------------
-USERNAME=qq329889612
-PASSWORD=Sjh890114
+USERNAME=
+PASSWORD=
 DOMAIN=sjh-vps.imwork.net
 
-/usr/bin/curl "http://${USERNAME}:${PASSWORD}@ddns.oray.com/ph/update?hostname=${DOMAIN}"
+while true
+do
+    /usr/bin/curl "http://${USERNAME}:${PASSWORD}@ddns.oray.com/ph/update?hostname=${DOMAIN}"
 
-sleep 1d
+    sleep 15m
+done

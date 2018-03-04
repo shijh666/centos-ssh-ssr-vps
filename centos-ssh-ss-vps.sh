@@ -13,11 +13,9 @@
 ROOT_PASSWORD=
 SSHD_PORT=22
 
-SSR_PORT=2000
-SSR_PASSWORD=
-SSR_METHOD=
-SSR_PROTOCOL=
-SSR_OBFS=
+SS_PORT=1000
+SS_PASSWORD=
+SS_METHOD=aes-256-cfb
 
 DDNS_USERNAME=
 DDNS_PASSWORD=
@@ -60,33 +58,25 @@ echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
 # Configure SSH
 # -----------------------------------------------------------------------------
 sed -i \
-  -e 's/^#\?Port 22/Port '${SSHD_PORT:-22}'/g' \
-  -e 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' \
-  -e 's/^#\?UsePAM.*/UsePAM no/g' \
-  /etc/ssh/sshd_config
+	-e 's/^#\?Port 22/Port '${SSHD_PORT:-22}'/g' \
+	-e 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' \
+	-e 's/^#\?UsePAM.*/UsePAM no/g' \
+	/etc/ssh/sshd_config
 
 ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N ''
 ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''
 ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 	
 # -----------------------------------------------------------------------------
-# Install & configure ShadowsocksR
+# Install & configure Shadowsocks
 # -----------------------------------------------------------------------------
-cd /root/ && \
-  git clone -b manyuser https://github.com/shijh666/shadowsocksr-origin.git shadowsocksr && \
-  cp -nf shadowsocksr/config.json shadowsocksr/shadowsocks/user-config.json
-
 sed -i \
+	-e 's/command=/command=ssserver -p ${SS_PORT:-1000} -k ${SS_PASSWORD:-none} -m ${SS_METHOD:-aes-256-cfb}/g' \
 	-e 's/^autostart=/autostart=true/g' \
-	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocksr.conf
-  
-sed -i \
-	-e 's/"server_port".*/"server_port": '${SSR_PORT:-1000}',/' \
-	-e 's/"password".*/"password": "'${SSR_PASSWORD:-password}'",/' \
-	-e 's/"method".*/"method": "'${SSR_METHOD:-rc4-md5}'",/' \
-	-e 's/"protocol".*/"protocol": "'${SSR_PROTOCOL:-auth_sha1_v4}'",/' \
-	-e 's/"obfs".*/"obfs": "'${SSR_OBFS:-tls1.2_ticket_auth}'",/' \
-	/root/shadowsocksr/shadowsocks/user-config.json
+	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocks.conf
+
+easy_install pip
+pip install git+https://github.com/shadowsocks/shadowsocks.git@master
 
 # -----------------------------------------------------------------------------
 # Install & configure DDNS
