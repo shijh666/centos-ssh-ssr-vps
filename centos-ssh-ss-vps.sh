@@ -72,7 +72,8 @@ sed -i \
 easy_install pip
 pip install git+https://github.com/shadowsocks/shadowsocks.git@master
 
-firewall-cmd --zone=public --add-port=${SSR_PORT:-1000}/tcp --permanent
+firewall-cmd --zone=public --add-port=${SS_PORT:-1000}/tcp --permanent
+firewall-cmd --zone=public --add-port=${SS_PORT:-1000}/udp --permanent
 
 # -----------------------------------------------------------------------------
 # Install & configure DDNS
