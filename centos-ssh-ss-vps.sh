@@ -99,11 +99,13 @@ sed -i \
 	-e 's/password=.*/password='${SVD_PASSWORD:-none}'/' \
 	/etc/supervisord.conf
 
-[ -n "$(cat /etc/rc.local | grep "supervisord")" ] || \
-	echo "supervisord -c /etc/supervisord.conf &" >> /etc/rc.local
-
 firewall-cmd --zone=public --add-port=${SVD_PORT:-1080}/tcp --permanent
 firewall-cmd --reload
+
+wget --no-check-certificate https://raw.githubusercontent.com/Supervisor/initscripts/master/centos-systemd-etcs \
+	-O /lib/systemd/system/supervisord.service
+
+systemctl enable supervisord.service
 
 # -----------------------------------------------------------------------------
 # Configure root password
