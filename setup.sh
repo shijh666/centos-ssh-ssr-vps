@@ -25,7 +25,7 @@ SVD_PORT=1080
 SVD_USERNAME=root
 SVD_PASSWORD=
 
-sudo -i
+[[ $EUID -ne 0 ]] && echo -e "Error: This script must be run as root!" && exit 1
 # -----------------------------------------------------------------------------
 # Install necessary packages
 # -----------------------------------------------------------------------------

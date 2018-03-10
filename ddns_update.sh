@@ -15,7 +15,7 @@ DOMAIN=sjh-vps.imwork.net
 
 while true
 do
-    /usr/bin/curl "http://${USERNAME}:${PASSWORD}@ddns.oray.com/ph/update?hostname=${DOMAIN}"
+	/usr/bin/curl "http://${USERNAME}:${PASSWORD}@ddns.oray.com/ph/update?hostname=${DOMAIN}"
 
-    sleep 15m
+	sleep 15m
 done
