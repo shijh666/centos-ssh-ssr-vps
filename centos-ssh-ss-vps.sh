@@ -10,6 +10,7 @@
 # -----------------------------------------------------------------------------
 # Set environment variables
 # -----------------------------------------------------------------------------
+PROXY_TOOL=SS
 ROOT_PASSWORD=
 SSHD_PORT=22
 
@@ -24,6 +25,7 @@ SVD_PORT=1080
 SVD_USERNAME=root
 SVD_PASSWORD=
 
+sudo -i
 # -----------------------------------------------------------------------------
 # Install necessary packages
 # -----------------------------------------------------------------------------
@@ -46,34 +48,66 @@ yum install -y \
 	screen \
 	lrzsz \
 	unzip && \
-yum clean all
+	
+easy_install pip
+	
+TMP_DIR=/root/centos-ssh-ssr-vps/
+chmod +x $TMP_DIR/bbr.sh
+cp -rf $TMP_DIR/etc/* /etc/
+cp -f $TMP_DIR/ddns_update.sh /root/ddns_update.sh
+chmod +x /root/ddns_update.sh
 
 # -----------------------------------------------------------------------------
 # Configure SSH
 # -----------------------------------------------------------------------------
 sed -i \
 	-e 's/^#\?Port 22/Port '${SSHD_PORT:-22}'/g' \
-	-e 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' \
-	-e 's/^#\?UsePAM.*/UsePAM no/g' \
+	-e 's/^#\?PermitRootLogin.*/PermitRootLogin no/g' \
+	-e 's/^#\?UsePAM.*/UsePAM yes/g' \
 	/etc/ssh/sshd_config
+
+rm -f /etc/ssh/ssh*key*
 
 ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N ''
 ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''
 ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 	
 # -----------------------------------------------------------------------------
-# Install & configure Shadowsocks
+# Install & configure Shadowsocks(R)
 # -----------------------------------------------------------------------------
-sed -i \
-	-e 's/command=.*/command=ssserver -p '${SS_PORT:-1000}' -k '${SS_PASSWORD:-none}' -m '${SS_METHOD:-aes-256-cfb}'/g' \
-	-e 's/^autostart=.*/autostart=true/g' \
-	/root/centos-ssh-ssr-vps/etc/supervisord.d/shadowsocks.conf
+[ "$PROXY_TOOL" == "SS" ] {
+	pip install git+https://github.com/shadowsocks/shadowsocks.git@master
+	
+	sed -i \
+		-e 's/"server_port".*/"server_port": '${SS_PORT:-1000}',/' \
+		-e 's/"password".*/"password": "'${SS_PASSWORD:-none}'",/' \
+		-e 's/"method".*/"method": "'${SS_METHOD:-aes-256-cfb}'",/' \
+		/etc/ss_config.json
+		
+	sed -i \
+		-e 's/^autostart=.*/autostart=true/g' \
+		/etc/supervisord.d/shadowsocks.conf
+}
 
-easy_install pip
-pip install git+https://github.com/shadowsocks/shadowsocks.git@master
+[ "$PROXY_TOOL" == "SSR" ] {
+	git clone -b manyuser https://github.com/shijh666/shadowsocksr-origin.git /root/shadowsocksr/
+	
+	sed -i \
+		-e 's/"server_port".*/"server_port": '${SS_PORT:-1000}',/' \
+		-e 's/"password".*/"password": "'${SS_PASSWORD:-none}'",/' \
+		-e 's/"method".*/"method": "'${SS_METHOD:-rc4-md5}'",/' \
+		-e 's/"protocol".*/"protocol": "'${SS_PROTOCOL:-auth_sha1_v4}'",/' \
+		-e 's/"obfs".*/"obfs": "'${SS_OBFS:-tls1.2_ticket_auth}'",/' \
+		/etc/ssr_config.json
+		
+	sed -i \
+		-e 's/^autostart=.*/autostart=true/g' \
+		/etc/supervisord.d/shadowsocksr.conf
+}
 
 firewall-cmd --zone=public --add-port=${SS_PORT:-1000}/tcp --permanent
 firewall-cmd --zone=public --add-port=${SS_PORT:-1000}/udp --permanent
+firewall-cmd --reload
 
 # -----------------------------------------------------------------------------
 # Install & configure DDNS
@@ -81,16 +115,11 @@ firewall-cmd --zone=public --add-port=${SS_PORT:-1000}/udp --permanent
 sed -i \
 	-e 's/^USERNAME=.*/USERNAME='${DDNS_USERNAME:-root}'/g' \
 	-e 's/^PASSWORD=.*/PASSWORD='${DDNS_PASSWORD:-none}'/g' \
-	/root/centos-ssh-ssr-vps/ddns_update.sh
-
-cp /root/centos-ssh-ssr-vps/ddns_update.sh /root/ddns_update.sh -rf
-chmod +x /root/ddns_update.sh
+	/root/ddns_update.sh
 
 # -----------------------------------------------------------------------------
 # Install & configure supervisor
 # -----------------------------------------------------------------------------
-cp /root/centos-ssh-ssr-vps/etc/* /etc/ -rf
-
 easy_install supervisor
 
 sed -i \
@@ -115,6 +144,4 @@ echo "root:${ROOT_PASSWORD:-$DEFAULT_PASSWORD}" | chpasswd
 # -----------------------------------------------------------------------------
 # Install bbr
 # -----------------------------------------------------------------------------
-wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh -P /root/centos-ssh-ssr-vps/
-chmod +x /root/centos-ssh-ssr-vps/bbr.sh
-/root/centos-ssh-ssr-vps/bbr.sh
+$TMP_DIR/bbr.sh
