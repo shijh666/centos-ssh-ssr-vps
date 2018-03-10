@@ -75,7 +75,7 @@ ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 # -----------------------------------------------------------------------------
 # Install & configure Shadowsocks(R)
 # -----------------------------------------------------------------------------
-[ "$PROXY_TOOL" == "SS" ] {
+[ "$PROXY_TOOL" == "SS" ] && {
 	pip install git+https://github.com/shadowsocks/shadowsocks.git@master
 	
 	sed -i \
@@ -89,7 +89,7 @@ ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N ''
 		/etc/supervisord.d/shadowsocks.conf
 }
 
-[ "$PROXY_TOOL" == "SSR" ] {
+[ "$PROXY_TOOL" == "SSR" ] && {
 	git clone -b manyuser https://github.com/shijh666/shadowsocksr-origin.git /root/shadowsocksr/
 	
 	sed -i \
