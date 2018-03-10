@@ -135,7 +135,7 @@ wget --no-check-certificate https://raw.githubusercontent.com/Supervisor/initscr
 	-O /lib/systemd/system/supervisord.service
 
 sed -i \
-	-e 's/^ExecStart=.*/ExecStart=/usr/bin/supervisord -c /etc/supervisord.conf/g' \
+	-e 's/^ExecStart=.*/ExecStart=\/usr\/bin\/supervisord -c \/etc\/supervisord.conf/g' \
 	/lib/systemd/system/supervisord.service
 
 systemctl enable supervisord.service
