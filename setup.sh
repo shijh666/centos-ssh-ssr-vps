@@ -134,6 +134,10 @@ firewall-cmd --reload
 wget --no-check-certificate https://raw.githubusercontent.com/Supervisor/initscripts/master/centos-systemd-etcs \
 	-O /lib/systemd/system/supervisord.service
 
+sed -i \
+	-e 's/^ExecStart=.*/ExecStart=/usr/bin/supervisord -c /etc/supervisord.conf/g' \
+	/lib/systemd/system/supervisord.service
+
 systemctl enable supervisord.service
 
 # -----------------------------------------------------------------------------
